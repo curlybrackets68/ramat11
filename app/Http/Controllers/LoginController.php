@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class LoginController extends Controller
@@ -13,6 +14,18 @@ class LoginController extends Controller
     {
         // return view('login');
         return view('index');
+    }
+
+    function login(Request $request) {
+        $userName = $request->userName;
+        $password = $request->password;
+
+        $user = User::where('name', $userName)->where('password', $password)->first();
+        if ($user) {
+            return redirect()->route('user.dashboard');
+        } else {
+            return redirect()->back()->withInput()->withError('Invalid Credentials.');
+        }
     }
 
     /**
@@ -61,5 +74,9 @@ class LoginController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    function dashboard(){
+        return view('dashboard');
     }
 }

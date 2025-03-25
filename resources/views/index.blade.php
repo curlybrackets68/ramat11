@@ -121,31 +121,41 @@
             <img src="{{ asset('assets/attachment/tata-ipl-logo-png_seeklogo-531750.png') }}" alt=""
                 style="height: 600px;width: 350px">
         </div>
+
         <div class="right">
+            <div style="margin-bottom: 20px;">
+                @if (session('error'))
+                    <div class="d-block">
+                        {{ session('error') }}
+                    </div>
+                @endif
+            </div>
             <h2>Login Account</h2>
-            <form>
-                <div class="input-group">
-                    {!! Form::label('email', 'Email', ['class' => 'required']) !!}
-                    {!! Form::email('email', '', [
-                        'class' => 'form-control form-control-sm required',
-                        'placeholder' => 'Enter your email',
-                        'id' => 'email',
-                    ]) !!}
-                </div>
-                <div class="input-group">
-                    {!! Form::label('password', 'Password', ['class' => 'required']) !!}
-                    {!! Form::password('password', [
-                        'class' => 'form-control form-control-sm required',
-                        'placeholder' => 'Enter your password',
-                        'id' => 'password',
-                    ]) !!}
-                </div>
-                <button type="submit" class="btn">Login</button>
+
+            {!! Form::open(['route' => 'user.login', 'method' => 'post', 'id' => 'loginForm']) !!}
+            <div class="input-group">
+                {!! Form::label('userName', 'Name', ['class' => 'required']) !!}
+                {!! Form::text('userName', '', [
+                    'class' => 'form-control form-control-sm required',
+                    'placeholder' => 'Enter your name',
+                    'id' => 'userName',
+                ]) !!}
+            </div>
+            <div class="input-group">
+                {!! Form::label('password', 'Password', ['class' => 'required']) !!}
+                {!! Form::password('password', [
+                    'class' => 'form-control form-control-sm required',
+                    'placeholder' => 'Enter your password',
+                    'id' => 'password',
+                ]) !!}
+            </div>
+            <button type="submit" class="btn">Login</button>
             </form>
             <div class="links">
                 <a href="#">Forgot password?</a> |
-                <a href="{{ route('user.show.register-page') }}">Create A New Registration</a>
+                <a href="#">Create A New Registration</a>
             </div>
+            {!! Form::close() !!}
         </div>
     </div>
 </body>
