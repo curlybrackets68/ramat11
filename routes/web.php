@@ -23,3 +23,5 @@ Route::get('contests', [MatchesController::class, 'contestsDetails'])->name('use
 Route::post('add-update-match', [MatchesController::class, 'addUpdate'])->name('user.add-update-match');
 Route::get('match-details/{id}', [MatchesController::class, 'matchDetails'])->name('user.match-details');
 Route::get('join-match/{id}', [MatchesController::class, 'joinMatch'])->name('user.join-match');
+
+Route::post('save-playing11', [MatchesController::class, 'savePlaying11'])->name('user.save-playing11');

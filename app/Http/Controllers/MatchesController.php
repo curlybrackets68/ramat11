@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Matches;
 use App\Models\MyMatch;
+use App\Models\Playing11;
 use App\Models\Team;
 use App\Models\User;
 use Carbon\Carbon;
@@ -57,5 +58,25 @@ class MatchesController extends Controller
     {
         $users = User::where('id', '!=', '1')->pluck('name', 'id');
         return view('join-match')->with(compact('id', 'users'));
+    }
+
+    public function savePlaying11(Request $request)
+    {
+        $matchId  = $request->matchId;
+        $teamId   = $request->teamId;
+
+        Playing11::where('match_id', $matchId)
+            ->where('team_id', $teamId)
+            ->delete();
+
+        foreach ($request->players as $player_id) {
+            Playing11::create([
+                'match_id' => $matchId,
+                'player_id'  => $player_id,
+                'team_id'  => $teamId,
+            ]);
+        }
+
+        return response()->json(['message' => 'Playing 11 saved successfully']);
     }
 }
