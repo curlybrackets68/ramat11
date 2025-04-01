@@ -19,7 +19,7 @@
                                 {{ $match->display_match_date_time }}
                             </p>
                             <div class="d-flex justify-content-center">
-                                <a href="{{ route('user.match-details', ['id' => $match->id]) }}" class="btn btn-info btn-sm mx-2">Bet</a>
+                                <a href="{{ route('user.match-details', ['id' => $match->id, 'team1' => $match->team1_id, 'team2' => $match->team2_id]) }}" class="btn btn-info btn-sm mx-2">Bet</a>
                             </div>
                         </div>
                         <div class="card-footer text-center">

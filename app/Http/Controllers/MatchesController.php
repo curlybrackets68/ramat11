@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Matches;
 use App\Models\MyMatch;
+use App\Models\Player;
 use App\Models\Playing11;
 use App\Models\Team;
 use App\Models\User;
@@ -14,7 +15,7 @@ class MatchesController extends Controller
     public function index()
     {
         $teams   = Team::all();
-        $matches = Matches::all();
+        $matches = Matches::orderByDesc('id')->get();
         return view('matches')->with(compact('teams', 'matches'));
     }
 
@@ -44,39 +45,110 @@ class MatchesController extends Controller
         $today = Carbon::today()->format('Y-m-d');
 
         $matches = Matches::whereDate('match_date', $today)->get();
-
         return view('contests', compact('matches'));
     }
 
-    public function matchDetails($id)
+    public function matchDetails($id, $team1Id, $team2Id)
     {
         $matches = MyMatch::where('match_id', $id)->get();
-        return view('match-details')->with(compact('matches', 'id'));
+        return view('match-details')->with(compact('matches', 'id', 'team1Id', 'team2Id'));
     }
 
-    public function joinMatch($id)
+    public function joinMatch($id, $team1Id, $team2Id)
     {
         $users = User::where('id', '!=', '1')->pluck('name', 'id');
-        return view('join-match')->with(compact('id', 'users'));
+
+        $team1Query = Team::find($team1Id, ['name']);
+        $team2Query = Team::find($team2Id, ['name']);
+
+        $team1 = Playing11::where('playing11.team_id', $team1Id)
+            ->join('players', 'players.id', '=', 'playing11.player_id')
+            ->pluck('players.name', 'players.id');
+
+        $team2 = Playing11::where('playing11.team_id', $team2Id)
+            ->join('players', 'players.id', '=', 'playing11.player_id')
+            ->pluck('players.name', 'players.id');
+
+        $selectedPlayers = [
+            $team1Query->name => $team1,
+            $team2Query->name => $team2,
+        ];
+
+        return view('join-match')->with(compact('id', 'users', 'selectedPlayers', 'team1Id', 'team2Id'));
+    }
+
+    public function getPlayers($team1Id, $team2Id)
+    {
+        $data = [];
+        if ($team1Id) {
+            $team1         = Player::where('team_id', $team1Id)->pluck('name', 'id');
+            $data['team1'] = $team1;
+        }
+        if ($team2Id) {
+            $team2         = Player::where('team_id', $team2Id)->pluck('name', 'id');
+            $data['team2'] = $team2;
+        }
+
+        $team1 = Playing11::where('team_id', $team1Id)->pluck('player_id');
+        $team2 = Playing11::where('team_id', $team2Id)->pluck('player_id');
+
+        $selectedPlayers = [
+            'team1' => $team1,
+            'team2' => $team2,
+        ];
+
+        $data['selectedPlayers'] = $selectedPlayers;
+
+        return response()->json(['code' => '1', 'data' => $data]);
     }
 
     public function savePlaying11(Request $request)
     {
-        $matchId  = $request->matchId;
-        $teamId   = $request->teamId;
+        $matchId = $request->match_id;
+        $teamId1 = $request->team_id1;
+        $teamId2 = $request->team_id2;
 
-        Playing11::where('match_id', $matchId)
-            ->where('team_id', $teamId)
-            ->delete();
+        $team1Players = json_decode($request->team1Players, true);
+        $team2Players = json_decode($request->team2Players, true);
 
-        foreach ($request->players as $player_id) {
-            Playing11::create([
-                'match_id' => $matchId,
-                'player_id'  => $player_id,
-                'team_id'  => $teamId,
-            ]);
+        Playing11::where('match_id', $matchId)->where('team_id', $teamId1)->delete();
+        Playing11::where('match_id', $matchId)->where('team_id', $teamId2)->delete();
+
+        if (! empty($team1Players)) {
+            foreach ($team1Players as $player_id) {
+                Playing11::create([
+                    'match_id'  => $matchId,
+                    'player_id' => $player_id,
+                    'team_id'   => $teamId1,
+                ]);
+            }
+        }
+
+        if (! empty($team2Players)) {
+            foreach ($team2Players as $player_id) {
+                Playing11::create([
+                    'match_id'  => $matchId,
+                    'player_id' => $player_id,
+                    'team_id'   => $teamId2,
+                ]);
+            }
         }
 
         return response()->json(['message' => 'Playing 11 saved successfully']);
+    }
+
+    public function saveContest(Request $request)
+    {
+        $matchId   = $request->matchId;
+        $userId    = $request->userId;
+        $playerIds = $request->playerIds;
+
+        MyMatch::create([
+            'user_id'   => $userId,
+            'match_id'  => $matchId,
+            'player_id' => $playerIds,
+        ]);
+
+        return response()->json(['message' => 'Contest Added successfully']);
     }
 }

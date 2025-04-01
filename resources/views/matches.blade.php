@@ -96,25 +96,22 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="playing11Form">
-                        @csrf
-                        <input type="hidden" name="match_id" id="matchId">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h6 id="team1Title"></h6>
-                                <div id="team1Players"></div>
-                                <p class="text-danger"><small>Selected: <span id="team1Count">0</span>/11</small></p>
-                            </div>
-                            <div class="col-md-6">
-                                <h6 id="team2Title"></h6>
-                                <div id="team2Players"></div>
-                                <p class="text-danger"><small>Selected: <span id="team2Count">0</span>/11</small></p>
-                            </div>
+                    <input type="hidden" name="match_id" id="matchId">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 id="team1Title"></h6>
+                            <div id="team1Players"></div>
+                            <p class="text-danger"><small>Selected: <span id="team1Count">0</span>/11</small></p>
                         </div>
-                        <div class="mt-3 text-center">
-                            <button type="submit" class="btn btn-success">Save Playing 11</button>
+                        <div class="col-md-6">
+                            <h6 id="team2Title"></h6>
+                            <div id="team2Players"></div>
+                            <p class="text-danger"><small>Selected: <span id="team2Count">0</span>/11</small></p>
                         </div>
-                    </form>
+                    </div>
+                    <div class="mt-3 text-center">
+                        <button type="submit" class="btn btn-success" id="savePlaying11">Save Playing 11</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -156,30 +153,53 @@
             let team1 = $(this).data('team1');
             let team2 = $(this).data('team2');
 
+            let url = '{{ route('user.get.players', ['id1' => 'ID1', 'id2' => 'ID2']) }}';
+            url = url.replace('ID1', $(this).data('team1-id')).replace('ID2', $(this).data('team2-id'));
+
+            $.get(url, function(response) {
+                if (response) {
+                    if (response.code == '1') {
+
+                        let team1Players = response.data.team1;
+                        let team2Players = response.data.team2;
+
+                        let selectedTeam1Players = response.data.selectedPlayers.team1;
+                        let selectedTeam2Players = response.data.selectedPlayers.team2;
+
+                        $('#team1Players').html(Object.entries(team1Players).map(([id, name]) => {
+                            let playerId = parseInt(id);
+                            let isChecked = selectedTeam1Players.includes(playerId) ?
+                                'checked' : '';
+                            return `<div><input type="checkbox" class="player-checkbox team1-checkbox" name="players[]" value="${playerId}" ${isChecked}> ${name}</div>`;
+                        }).join(''));
+
+                        $('#team2Players').html(Object.entries(team2Players).map(([id, name]) => {
+                            let playerId = parseInt(id);
+                            let isChecked = selectedTeam2Players.includes(playerId) ?
+                                'checked' : '';
+                            return `<div><input type="checkbox" class="player-checkbox team2-checkbox" name="players[]" value="${playerId}" ${isChecked}> ${name}</div>`;
+                        }).join(''));
+
+                        updateTeamCounts(selectedTeam1Players, selectedTeam2Players);
+                    }
+                }
+            });
+
             $('#matchTitle').text(team1 + ' vs ' + team2);
             $('#matchId').val(matchId);
             $('#team1Title').text(team1).attr('data-team-id', $(this).data('team1-id'));
             $('#team2Title').text(team2).attr('data-team-id', $(this).data('team2-id'));
-
-            let team1Players = ['Player 1', 'Player 2', 'Player 3', 'Player 4', 'Player 5', 'Player 6', 'Player 7',
-                'Player 8', 'Player 9', 'Player 10', 'Player 11', 'Player 12', 'Player 13'
-            ];
-            let team2Players = ['Player A', 'Player B', 'Player C', 'Player D', 'Player E', 'Player F', 'Player G',
-                'Player H', 'Player I', 'Player J', 'Player K', 'Player L', 'Player M'
-            ];
-
-            $('#team1Players').html(team1Players.map(player =>
-                `<div><input type="checkbox" class="player-checkbox team1-checkbox" name="players[]" value="${player}"> ${player}</div>`
-            ).join(''));
-            $('#team2Players').html(team2Players.map(player =>
-                `<div><input type="checkbox" class="player-checkbox team2-checkbox" name="players[]" value="${player}"> ${player}</div>`
-            ).join(''));
 
             $('#team1Count').text(0);
             $('#team2Count').text(0);
 
             $('#playing11Modal').modal('show');
         });
+
+        function updateTeamCounts(selectedTeam1Players, selectedTeam2Players) {
+            $('#team1Count').text(selectedTeam1Players.length);
+            $('#team2Count').text(selectedTeam2Players.length);
+        }
 
         $(document).on('change', '.team1-checkbox', function() {
             let team1Selected = $('.team1-checkbox:checked').length;
@@ -203,10 +223,11 @@
             }
         });
 
-        $('#playing11Form').submit(function(e) {
-            e.preventDefault();
-
+        $(document).on('click', '#savePlaying11', function() {
             let matchId = $('#matchId').val();
+            let teamId1 = $('#team1Title').data('team-id');
+            let teamId2 = $('#team2Title').data('team-id');
+
             let team1Players = $('.team1-checkbox:checked').map(function() {
                 return this.value;
             }).get();
@@ -219,22 +240,29 @@
                 return;
             }
 
-            let playersTeamWise = {
-                team1: team1Players,
-                team2: team2Players,
+            let playing11Data = {
+                match_id: matchId,
+                team1Players: JSON.stringify(team1Players),
+                team2Players: JSON.stringify(team2Players),
+                team_id1: teamId1,
+                team_id2: teamId2,
+                _token: "{{ csrf_token() }}"
             };
 
+            let url = '{{ route('user.save-playing11') }}';
 
-            let playing11Data = [{
-                match_id: matchId,
-                players: playersTeamWise,
-                team_id1: $('#team1Title').data('team-id'),
-                team_id2: $('#team2Title').data('team-id'),
-                _token: "{{ csrf_token() }}"
-            }];
-
-            console.log(playing11Data);
-            return false;
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: playing11Data,
+                success: function(response) {
+                    location.reload();
+                    alert(response.message);
+                },
+                error: function(xhr) {
+                    console.error("Error saving playing 11:", xhr.responseText);
+                }
+            });
         });
     </script>
 @endsection

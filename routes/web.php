@@ -26,8 +26,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('matches', [MatchesController::class, 'index'])->name('user.matches');
     Route::get('contests', [MatchesController::class, 'contestsDetails'])->name('user.contests');
     Route::post('add-update-match', [MatchesController::class, 'addUpdate'])->name('user.add-update-match');
-    Route::get('match-details/{id}', [MatchesController::class, 'matchDetails'])->name('user.match-details');
-    Route::get('join-match/{id}', [MatchesController::class, 'joinMatch'])->name('user.join-match');
+    Route::get('match-details/{id}/{team1}/{team2}', [MatchesController::class, 'matchDetails'])->name('user.match-details');
+    Route::get('join-match/{id}/{team1}/{team2}', [MatchesController::class, 'joinMatch'])->name('user.join-match');
 
     Route::post('save-playing11', [MatchesController::class, 'savePlaying11'])->name('user.save-playing11');
+    Route::get('get-players/{id1}/{id2}', [MatchesController::class, 'getPlayers'])->name('user.get.players');
+
+    Route::post('save-contest', [MatchesController::class, 'saveContest'])->name('user.save-contest');
 });
