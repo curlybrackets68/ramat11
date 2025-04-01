@@ -38,6 +38,8 @@
                     </li>
                 </ul>
             </div>
+            <a href="{{ route('user.logout') }}" class="btn btn-outline-danger">Logout &nbsp;<i
+                    class="nav-icon bi bi-box-arrow-in-right"></i></a>
         </nav>
     </div>
 

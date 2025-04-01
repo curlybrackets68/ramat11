@@ -1,9 +1,9 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
@@ -16,12 +16,14 @@ class LoginController extends Controller
         return view('index');
     }
 
-    function login(Request $request) {
+    public function login(Request $request)
+    {
         $userName = $request->userName;
         $password = $request->password;
 
         $user = User::where('name', $userName)->where('password', $password)->first();
         if ($user) {
+            Auth::login($user);
             return redirect()->route('user.dashboard');
         } else {
             return redirect()->back()->withInput()->withError('Invalid Credentials.');
@@ -76,7 +78,14 @@ class LoginController extends Controller
         //
     }
 
-    function dashboard(){
+    public function logout()
+    {
+        Auth::logout();
+        return redirect()->route('user.show.login-page');
+    }
+
+    public function dashboard()
+    {
         return view('dashboard');
     }
 }
