@@ -54,7 +54,7 @@
                 }
             });
 
-            let countdown = 10;
+            let countdown = 5;
 
             function updateCountdown() {
                 $(".countdown-timer").text(`Please select any player in ${countdown} seconds`);
