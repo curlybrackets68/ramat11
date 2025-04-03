@@ -9,6 +9,7 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" />
+    @yield('css')
 </head>
 
 <body>
@@ -37,6 +38,9 @@
                         <a class="nav-link" href="{{ route('user.contests') }}">Contests</a>
                     </li>
                 </ul>
+            </div>
+            <div>
+                <h6 class="me-3 navbar-brand">Welcome, {{ Str::ucfirst(Auth::user()->name) }}</h6>
             </div>
             <a href="{{ route('user.logout') }}" class="btn btn-outline-danger">Logout &nbsp;<i
                     class="nav-icon bi bi-box-arrow-in-right"></i></a>

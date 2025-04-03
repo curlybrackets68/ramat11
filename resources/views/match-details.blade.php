@@ -4,7 +4,8 @@
     <div class="card mt-5">
         <div class="card-header">
             <div class="d-flex justify-content-between">
-                <h5>My Matches</h5>
+                <span style="font-weight: bold;">{{ $matchName }} </span>
+                <span style="font-weight: bold;">Time: {{ $matchDate }}</span>
                 <a href="{{ route('user.join-match', ['id' => $id, 'team1' => $team1Id, 'team2' => $team2Id]) }}"
                     class="btn btn-primary btn-sm">Join Other</a>
             </div>
@@ -14,9 +15,7 @@
                 <thead>
                     <tr>
                         <th>Sr.No</th>
-                        <th>Date</th>
                         <th>User Name</th>
-                        <th>Match</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -25,10 +24,9 @@
                     @forelse ($matches as $match)
                         <tr>
                             <th>{{ $serialNo++ }}</th>
-                            <th>{{ $match->match_date_time }}</th>
-                            <th>{{ $match->user_name }}</th>
-                            <th>{{ $match->match_name }}</th>
-                            <th><a href="" class="btn btn-primary btn-sm">Completed</a></th>
+                            <th>{{ Str::ucfirst($match->user_name) }}</th>
+                            <th><a href="" class="btn btn-primary btn-sm" data-match-id="{{ $id }}"
+                                    data-user-id="{{ $match->user_id }}">Completed</a></th>
                         </tr>
                     @empty
                     @endforelse

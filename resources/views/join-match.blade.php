@@ -1,36 +1,30 @@
 @extends('master')
 
 @section('content')
-    <div class="card mt-5 mb-5">
+    <div class="card mt-1 mb-5">
         <div class="card-header">
             <div class="d-flex justify-content-between">
                 <h5>Join Matches</h5>
+                <span class="countdown-timer" style="font-weight: bold">Please select any player in 10 seconds</span>
             </div>
         </div>
         <div class="card-body">
-            <div class="row mt-3">
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="user_id">User</label>
-                        <select id="user_id" class="form-control select2" name="user_id">
-                            <option value="">Select User</option>
-                            @foreach ($users as $key => $value)
-                                <option value="{{ $key }}">{{ $value }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-            </div>
             <div id="players-container">
-                <div class="row mt-3 player-row">
+                <div class="row player-row">
                     @foreach ($selectedPlayers as $teamName => $players)
                         <div class="col-md-6">
                             <h4>{{ $teamName }}</h4>
-                            @foreach ($players as $playerId => $playerName)
+                            @foreach ($players as $player)
                                 <div>
                                     <input type="checkbox" class="player-checkbox team1-checkbox" name="players[]"
-                                        value="{{ $playerId }}" id="player_{{ $playerId }}">
-                                    <label for="player_{{ $playerId }}">{{ $playerName }}</label>
+                                        value="{{ $player->player_id }}" id="player_{{ $player->player_id }}"
+                                        {{ !empty($player->user_name) ? 'disabled' : '' }}>
+                                    <label for="player_{{ $player->player_id }}">
+                                        {{ $player->player_name }}
+                                        @if (!empty($player->user_name))
+                                            (Selected by: {{ $player->user_name }})
+                                        @endif
+                                    </label>
                                 </div>
                             @endforeach
                         </div>
@@ -39,9 +33,9 @@
             </div>
         </div>
         <div class="card-footer text-left">
-            <button type="submit" class="btn btn-success" id="saveContest">Save</button>
+            <button type="submit" class="btn btn-success btn-sm" id="saveContest">Add</button>
             <a href="{{ route('user.join-match', ['id' => $id, 'team1' => $team1Id, 'team2' => $team2Id]) }}"
-                class="btn btn-danger">Cancel</a>
+                class="btn btn-danger btn-sm">Cancel</a>
         </div>
     </div>
 @endsection
@@ -49,40 +43,51 @@
 @section('js')
     <script>
         $(document).ready(function() {
-            const maxTotalSelection = 5;
+            const maxTotalSelection = 1;
 
             $(document).on('change', '.player-checkbox', function() {
                 let selectedCount = $('.player-checkbox:checked').length;
 
                 if (selectedCount > maxTotalSelection) {
-                    alert('You can select only 5 players in total.');
+                    alert('You can select only 1 players at time.');
                     $(this).prop('checked', false);
                 }
             });
+
+            let countdown = 10;
+
+            function updateCountdown() {
+                $(".countdown-timer").text(`Please select any player in ${countdown} seconds`);
+                if (countdown === 0) {
+                    location.reload();
+                } else {
+                    countdown--;
+                    setTimeout(updateCountdown, 1000);
+                }
+            }
+
+            updateCountdown();
+        });
+
+        $('input[type="checkbox"]').on('change', function() {
+            $('input[type="checkbox"]').not(this).prop('checked', false);
         });
 
         $(document).on('click', '#saveContest', function() {
             let matchId = '{{ @$id }}';
-            let userId = $('#user_id').val();
 
-            let teamPlayers = $('.player-checkbox:checked').map(function() {
-                return parseInt(this.value);
-            }).get();
+            let selectedCount = $('.player-checkbox:checked').length;
 
-            if (teamPlayers.length !== 5) {
-                alert('Please select exactly 5 players.');
-                return;
-            }
+            let selectedPlayer = $('.player-checkbox:checked').val();
 
-            if (userId == '') {
-                alert('Please select user.');
+            if (selectedCount !== 1) {
+                alert('Please select exactly 1 player.');
                 return;
             }
 
             let data = {
                 matchId: matchId,
-                userId: userId,
-                playerIds: JSON.stringify(teamPlayers),
+                playerId: selectedPlayer,
                 _token: "{{ csrf_token() }}"
             };
 
@@ -99,7 +104,7 @@
                 error: function(xhr) {
                     console.error("Error saving contest:", xhr.responseText);
                 }
-            });            
+            });
         });
     </script>
 @endsection
