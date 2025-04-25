@@ -69,14 +69,14 @@ class MatchesController extends Controller
         $team1Query = Team::find($team1Id, ['name']);
         $team2Query = Team::find($team2Id, ['name']);
 
-        $team1 = Playing11::where('playing11.team_id', $team1Id)
+        $team1 = Playing11::where('playing11.match_id', $id)->where('playing11.team_id', $team1Id)
         ->join('players', 'players.id', '=', 'playing11.player_id')
         ->leftJoin('my_matches', 'playing11.player_id', '=', 'my_matches.player_id')
         ->leftJoin('users', 'my_matches.user_id', '=', 'users.id')
         ->select('playing11.player_id', 'players.name as player_name', 'users.name as user_name')
         ->get();
 
-        $team2 = Playing11::where('playing11.team_id', $team2Id)
+        $team2 = Playing11::where('playing11.match_id', $id)->where('playing11.team_id', $team2Id)
             ->join('players', 'players.id', '=', 'playing11.player_id')
             ->leftJoin('my_matches', 'playing11.player_id', '=', 'my_matches.player_id')
             ->leftJoin('users', 'my_matches.user_id', '=', 'users.id')
@@ -91,7 +91,7 @@ class MatchesController extends Controller
         return view('join-match')->with(compact('id', 'selectedPlayers', 'team1Id', 'team2Id'));
     }
 
-    public function getPlayers($team1Id, $team2Id)
+    public function getPlayers($team1Id, $team2Id, $matchId)
     {
         $data = [];
         if ($team1Id) {
@@ -103,8 +103,8 @@ class MatchesController extends Controller
             $data['team2'] = $team2;
         }
 
-        $team1 = Playing11::where('team_id', $team1Id)->pluck('player_id');
-        $team2 = Playing11::where('team_id', $team2Id)->pluck('player_id');
+        $team1 = Playing11::where('match_id', $matchId)->where('team_id', $team1Id)->pluck('player_id');
+        $team2 = Playing11::where('match_id', $matchId)->where('team_id', $team2Id)->pluck('player_id');
 
         $selectedPlayers = [
             'team1' => $team1,

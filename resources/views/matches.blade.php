@@ -153,8 +153,8 @@
             let team1 = $(this).data('team1');
             let team2 = $(this).data('team2');
 
-            let url = '{{ route('user.get.players', ['id1' => 'ID1', 'id2' => 'ID2']) }}';
-            url = url.replace('ID1', $(this).data('team1-id')).replace('ID2', $(this).data('team2-id'));
+            let url = '{{ route('user.get.players', ['id1' => 'ID1', 'id2' => 'ID2', 'matchId' => 'MATCH_ID']) }}';
+            url = url.replace('ID1', $(this).data('team1-id')).replace('ID2', $(this).data('team2-id')).replace('MATCH_ID', matchId);
 
             $.get(url, function(response) {
                 if (response) {

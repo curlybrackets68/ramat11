@@ -5,7 +5,7 @@
         <div class="card-header">
             <div class="d-flex justify-content-between">
                 <h5>Join Matches</h5>
-                <span class="countdown-timer" style="font-weight: bold">Please select any player in 10 seconds</span>
+                <span class="countdown-timer" style="font-weight: bold">Please select any player in 5 seconds</span>
             </div>
         </div>
         <div class="card-body">
@@ -66,7 +66,7 @@
                 }
             }
 
-            updateCountdown();
+            // updateCountdown();
         });
 
         $('input[type="checkbox"]').on('change', function() {

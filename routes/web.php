@@ -30,7 +30,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('join-match/{id}/{team1}/{team2}', [MatchesController::class, 'joinMatch'])->name('user.join-match');
 
     Route::post('save-playing11', [MatchesController::class, 'savePlaying11'])->name('user.save-playing11');
-    Route::get('get-players/{id1}/{id2}', [MatchesController::class, 'getPlayers'])->name('user.get.players');
+    Route::get('get-players/{id1}/{id2}/{matchId}', [MatchesController::class, 'getPlayers'])->name('user.get.players');
 
     Route::post('save-contest', [MatchesController::class, 'saveContest'])->name('user.save-contest');
 });
